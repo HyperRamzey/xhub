@@ -9,8 +9,12 @@ const HISTORY_ICON =
 const EMOJIS = ['❤️', '💖', '💗', '💓', '💕', '💞'];
 
 let lastFocused: HTMLElement | null = null;
+const hideTimers = new WeakMap<HTMLElement, number>();
 
 export function showModal(modal: HTMLElement): void {
+  // Cancel a pending hide (e.g. rapid Back→Forward) so it can't blank us
+  const pending = hideTimers.get(modal);
+  if (pending) window.clearTimeout(pending);
   lastFocused = document.activeElement as HTMLElement | null;
   modal.hidden = false;
   requestAnimationFrame(() => {
@@ -22,13 +26,19 @@ export function showModal(modal: HTMLElement): void {
 
 export function hideModal(modal: HTMLElement): void {
   modal.classList.remove('visible');
-  window.setTimeout(() => {
+  hideTimers.set(modal, window.setTimeout(() => {
     modal.hidden = true;
-  }, 300);
+  }, 300));
   // Return focus to whatever opened the dialog
   if (lastFocused?.isConnected) lastFocused.focus();
   lastFocused = null;
-  if (modal.id === 'script-detail-modal') setScriptParam(null);
+  if (modal.id === 'script-detail-modal') {
+    // UI close of a pushed entry: rewind history (popstate no-ops because the
+    // modal is already hidden). Deep-link landings have no pushed state — just
+    // clean the URL in place.
+    if (window.history.state?.s) window.history.back();
+    else setScriptParam(null);
+  }
 }
 
 /** Keep ?s=<script-id> in sync with the open detail modal. */
@@ -127,8 +137,15 @@ function openDetailModal(script: ScriptDef): void {
   const gallery = document.getElementById('modal-image-gallery') as HTMLElement;
   title.textContent = script.title;
   description.textContent = script.description;
-  // Mirror the open script into ?s= so the view is shareable/bookmarkable
-  setScriptParam(script.id);
+  // Mirror the open script into ?s= so the view is shareable, and push a
+  // history entry so the (mobile) Back button closes the modal instead of
+  // leaving the site. Deep-link landings already have ?s= in the URL — no
+  // push there, so Back still exits to wherever the visitor came from.
+  if (new URLSearchParams(window.location.search).get('s') !== script.id) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('s', script.id);
+    window.history.pushState({ s: script.id }, '', url);
+  }
   copyBtn.innerHTML = '💪 Copy Script';
   const shareBtn = document.getElementById('modal-share-btn') as HTMLButtonElement;
   shareBtn.innerHTML = '🔗 Share';
@@ -287,6 +304,22 @@ export function renderCards(): void {
     if (target) openDetailModal(target);
     else setScriptParam(null); // stale/unknown id — clean the URL
   }
+
+  // Back/Forward drive the modal: Back closes it (instead of leaving the
+  // site), Forward reopens it. Both branches are loop-safe — hideModal only
+  // rewinds history when a pushed ?s= entry is still current, and
+  // openDetailModal only pushes when ?s= isn't already in the URL.
+  window.addEventListener('popstate', () => {
+    const modal = document.getElementById('script-detail-modal') as HTMLElement;
+    const id = new URLSearchParams(window.location.search).get('s');
+    const isOpen = modal.classList.contains('visible');
+    if (!id && isOpen) {
+      hideModal(modal);
+    } else if (id && !isOpen) {
+      const target = SCRIPTS.find((s) => s.id === id);
+      if (target) openDetailModal(target);
+    }
+  });
 }
 
 export function setupSearch(): void {
