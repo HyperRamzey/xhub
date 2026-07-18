@@ -84,8 +84,16 @@ export function startConstellation(canvas: HTMLCanvasElement): () => void {
   }
 
   function resize(): void {
-    canvas.width = Math.floor(window.innerWidth * dpr);
-    canvas.height = Math.floor(window.innerHeight * dpr);
+    const w = Math.floor(window.innerWidth * dpr);
+    const h = Math.floor(window.innerHeight * dpr);
+    // Mobile browsers fire resize when the address bar slides in/out while
+    // scrolling — width is unchanged and height shifts by <~120px. Reseeding
+    // there makes every star visibly jump mid-scroll; skip it.
+    if (canvas.width === w && Math.abs(canvas.height - h) < 120 * dpr && canvas.height > 0) {
+      return;
+    }
+    canvas.width = w;
+    canvas.height = h;
     seed();
   }
 
