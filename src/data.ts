@@ -62,7 +62,7 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '👑 VERIFIED', cls: 'verified' },
     ],
     images: [
-      'scripts/yt-trade-scam.jpg',
+      'scripts/yt-wfl-trade.jpg',
       'scripts/yt-trade-scam-new.jpg',
       'scripts/trade-checker-1.jpg',
     ],
@@ -93,7 +93,7 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '👑 VERIFIED', cls: 'verified' },
     ],
     images: [
-      'scripts/yt-adoptme-event.jpg',
+      'scripts/yt-money-farm.jpg',
       'scripts/food-money-1.jpg',
     ],
   },
@@ -143,7 +143,7 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '👑 VERIFIED', cls: 'verified' },
     ],
     images: [
-      'scripts/yt-eclipse-showcase.jpg',
+      'scripts/yt-snow-hub.jpg',
       'scripts/snowy-1.jpg',
       'scripts/snowy-2.jpg',
     ],
@@ -177,7 +177,8 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '👑 VERIFIED', cls: 'verified' },
     ],
     images: [
-      'scripts/yt-pet-spawner-halloween.jpg',
+      'scripts/yt-house-cloner.jpg',
+      'scripts/yt-house-clone.jpg',
       'scripts/dp-hub-1.jpg',
     ],
   },
