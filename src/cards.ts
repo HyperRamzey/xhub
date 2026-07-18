@@ -8,9 +8,16 @@ const HISTORY_ICON =
 
 const EMOJIS = ['❤️', '💖', '💗', '💓', '💕', '💞'];
 
+let lastFocused: HTMLElement | null = null;
+
 function showModal(modal: HTMLElement): void {
+  lastFocused = document.activeElement as HTMLElement | null;
   modal.hidden = false;
-  requestAnimationFrame(() => modal.classList.add('visible'));
+  requestAnimationFrame(() => {
+    modal.classList.add('visible');
+    // Move focus into the dialog so keyboard/screen-reader users land inside it
+    modal.querySelector<HTMLElement>('.close-modal')?.focus();
+  });
 }
 
 export function hideModal(modal: HTMLElement): void {
@@ -18,6 +25,9 @@ export function hideModal(modal: HTMLElement): void {
   window.setTimeout(() => {
     modal.hidden = true;
   }, 300);
+  // Return focus to whatever opened the dialog
+  if (lastFocused?.isConnected) lastFocused.focus();
+  lastFocused = null;
 }
 
 function openPreviewModal(scriptText: string, copied: boolean): void {
