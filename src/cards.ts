@@ -247,6 +247,7 @@ export function renderCards(): void {
 export function setupSearch(): void {
   const searchBar = document.getElementById('search-bar') as HTMLInputElement;
   const noResults = document.getElementById('no-results') as HTMLElement;
+  const status = document.getElementById('search-status') as HTMLElement;
 
   const applyFilter = (term: string): void => {
     const q = term.trim().toLowerCase();
@@ -258,6 +259,8 @@ export function setupSearch(): void {
       if (match) visible++;
     });
     noResults.hidden = visible > 0;
+    // Announce result count to screen readers (empty query = no announcement)
+    status.textContent = q ? `${visible} script${visible === 1 ? '' : 's'} found` : '';
   };
 
   searchBar.addEventListener('input', () => applyFilter(searchBar.value));

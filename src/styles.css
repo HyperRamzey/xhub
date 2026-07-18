@@ -49,6 +49,21 @@ body[data-stage="bios"], body[data-stage="xp"], body[data-stage="entry"] { overf
   clip-path: inset(50%); overflow: hidden; white-space: nowrap;
 }
 
+/* Skip-to-content link: invisible until keyboard-focused */
+.skip-link {
+  position: fixed;
+  top: -100px; left: 12px;
+  z-index: 2000;
+  padding: 10px 16px;
+  background: var(--teal);
+  color: #04121a;
+  font-weight: 700;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus-visible { top: 12px; }
+
 /* ---------- GPU promotion: only on layers that actually move ---------- */
 .stage-layer, #star-constellation, #crt-overlay, #custom-cursor,
 .script-card, .btn, .placard, #back-to-top, .modal-content,
