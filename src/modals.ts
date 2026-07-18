@@ -56,13 +56,16 @@ function setupImageOverlay(): void {
   const overlay = imageOverlay();
   const enlarged = document.getElementById('enlarged-image') as HTMLImageElement;
 
-  document.querySelectorAll<HTMLImageElement>('.gallery-img').forEach((img) => {
-    img.closest('.gallery-img-container')?.addEventListener('click', () => {
-      enlarged.src = img.src;
-      overlay.hidden = false;
-      requestAnimationFrame(() => overlay.classList.add('active'));
-      document.body.style.overflow = 'hidden';
-    });
+  // Delegated: gallery images are re-created every time the detail modal
+  // opens, so a static querySelectorAll at init would never match them.
+  document.addEventListener('click', (e) => {
+    const container = (e.target as HTMLElement).closest<HTMLElement>('.gallery-img-container');
+    const img = container?.querySelector<HTMLImageElement>('.gallery-img');
+    if (!img) return;
+    enlarged.src = img.src;
+    overlay.hidden = false;
+    requestAnimationFrame(() => overlay.classList.add('active'));
+    document.body.style.overflow = 'hidden';
   });
 
   overlay.querySelector('.close-overlay')?.addEventListener('click', closeImageOverlay);
