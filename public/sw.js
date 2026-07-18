@@ -33,10 +33,19 @@ function fetchAndCache(request, preload) {
   return network.then((response) => {
     if (response.ok && new URL(request.url).origin === self.location.origin) {
       const clone = response.clone();
-      caches.open(CACHE).then((cache) => cache.put(request, clone));
+      // Navigations are keyed without the query string: ?s=/?q= variants all
+      // serve the same SPA shell, so one entry covers every deep link.
+      const key = request.mode === 'navigate' ? stripSearch(request.url) : request;
+      caches.open(CACHE).then((cache) => cache.put(key, clone));
     }
     return response;
   });
+}
+
+function stripSearch(u) {
+  const url = new URL(u);
+  url.search = '';
+  return url.href;
 }
 
 self.addEventListener('fetch', (event) => {
@@ -50,7 +59,9 @@ self.addEventListener('fetch', (event) => {
     immutable
       ? caches.match(request).then((hit) => hit || fetchAndCache(request))
       : fetchAndCache(request, event.preloadResponse).catch(() =>
-          caches.match(request).then((hit) => hit || Response.error())
+          caches
+            .match(request.mode === 'navigate' ? stripSearch(request.url) : request)
+            .then((hit) => hit || Response.error())
         )
   );
 });
