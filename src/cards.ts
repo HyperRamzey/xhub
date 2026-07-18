@@ -131,6 +131,7 @@ function openDetailModal(script: ScriptDef): void {
       img.alt = `${script.title} preview`;
       img.className = 'gallery-img';
       img.loading = 'lazy';
+      img.decoding = 'async';
       btn.appendChild(img);
       gallery.appendChild(btn);
     }
@@ -151,6 +152,8 @@ export function renderCards(): void {
     card.className = 'script-card';
     card.style.setProperty('--card-i', String(i));
     card.dataset.scriptId = script.id;
+    // Searchable haystack: heading + description + tag labels
+    card.dataset.search = `${script.heading} ${script.description} ${script.tags.map((t) => t.label).join(' ')}`.toLowerCase();
 
     const h2 = document.createElement('h2');
     h2.textContent = script.heading;
@@ -166,6 +169,9 @@ export function renderCards(): void {
         thumb.alt = `${script.title} preview ${i + 1}`;
         thumb.className = 'card-img-thumb';
         thumb.loading = 'lazy';
+        thumb.decoding = 'async';
+        thumb.width = 160;
+        thumb.height = 90;
         imgStrip.appendChild(thumb);
       }
       card.insertBefore(imgStrip, h2.nextSibling);
@@ -209,8 +215,18 @@ export function renderCards(): void {
 
     buttons.append(copyBtn, historyBtn);
     card.append(h2, meta, pre, buttons);
+    // Card is clickable + keyboard-operable (opens detail modal)
+    card.tabIndex = 0;
+    card.setAttribute('role', 'button');
+    card.setAttribute('aria-label', `${script.title} — details`);
     card.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).closest('button, a')) return;
+      openDetailModal(script);
+    });
+    card.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if ((e.target as HTMLElement).closest('button, a')) return;
+      e.preventDefault();
       openDetailModal(script);
     });
     container.appendChild(card);
@@ -222,11 +238,11 @@ export function setupSearch(): void {
   const noResults = document.getElementById('no-results') as HTMLElement;
 
   const applyFilter = (term: string): void => {
-    const q = term.toLowerCase();
+    const q = term.trim().toLowerCase();
     let visible = 0;
     document.querySelectorAll<HTMLElement>('.script-card').forEach((card) => {
-      const title = card.querySelector('h2')?.textContent?.toLowerCase() ?? '';
-      const match = title.includes(q);
+      const haystack = card.dataset.search ?? card.querySelector('h2')?.textContent?.toLowerCase() ?? '';
+      const match = haystack.includes(q);
       card.style.display = match ? 'flex' : 'none';
       if (match) visible++;
     });
