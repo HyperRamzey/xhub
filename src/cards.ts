@@ -28,6 +28,15 @@ export function hideModal(modal: HTMLElement): void {
   // Return focus to whatever opened the dialog
   if (lastFocused?.isConnected) lastFocused.focus();
   lastFocused = null;
+  if (modal.id === 'script-detail-modal') setScriptParam(null);
+}
+
+/** Keep ?s=<script-id> in sync with the open detail modal. */
+function setScriptParam(id: string | null): void {
+  const url = new URL(window.location.href);
+  if (id) url.searchParams.set('s', id);
+  else url.searchParams.delete('s');
+  window.history.replaceState(null, '', url);
 }
 
 function openPreviewModal(scriptText: string, copied: boolean): void {
@@ -118,6 +127,8 @@ function openDetailModal(script: ScriptDef): void {
   const gallery = document.getElementById('modal-image-gallery') as HTMLElement;
   title.textContent = script.title;
   description.textContent = script.description;
+  // Mirror the open script into ?s= so the view is shareable/bookmarkable
+  setScriptParam(script.id);
   copyBtn.innerHTML = '💪 Copy Script';
   copyBtn.onclick = async () => {
     const text = generateRandomLoadstring();
@@ -246,6 +257,14 @@ export function renderCards(): void {
     });
     container.appendChild(card);
   });
+
+  // Honour ?s=<id> deep links: open that script's detail modal on load.
+  const requested = new URLSearchParams(window.location.search).get('s');
+  if (requested) {
+    const target = SCRIPTS.find((s) => s.id === requested);
+    if (target) openDetailModal(target);
+    else setScriptParam(null); // stale/unknown id — clean the URL
+  }
 }
 
 export function setupSearch(): void {
