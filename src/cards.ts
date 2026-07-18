@@ -130,6 +130,8 @@ function openDetailModal(script: ScriptDef): void {
   // Mirror the open script into ?s= so the view is shareable/bookmarkable
   setScriptParam(script.id);
   copyBtn.innerHTML = '💪 Copy Script';
+  const shareBtn = document.getElementById('modal-share-btn') as HTMLButtonElement;
+  shareBtn.innerHTML = '🔗 Share';
   copyBtn.onclick = async () => {
     const text = generateRandomLoadstring();
     const ok = await copyToClipboard(text);
@@ -138,6 +140,26 @@ function openDetailModal(script: ScriptDef): void {
     } else {
       // Clipboard blocked — still surface the script link so the user can copy manually.
       openPreviewModal(text, false);
+    }
+  };
+  shareBtn.onclick = async () => {
+    const url = new URL(window.location.href);
+    url.search = `?s=${script.id}`;
+    const link = url.toString();
+    // Native share sheet where available (mobile); clipboard elsewhere.
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: script.title, url: link });
+        return;
+      } catch {
+        /* user cancelled — fall through to clipboard */
+      }
+    }
+    if (await copyToClipboard(link)) {
+      shareBtn.innerHTML = '✅ Link copied!';
+      window.setTimeout(() => {
+        shareBtn.innerHTML = '🔗 Share';
+      }, 2000);
     }
   };
   // Populate gallery dynamically
