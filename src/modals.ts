@@ -16,6 +16,27 @@ export function setupModals(): void {
     closeImageOverlay();
   });
 
+  // Trap Tab focus inside the topmost open dialog (aria-modal expects it).
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const open = document.querySelector<HTMLElement>('.modal-overlay.visible');
+    if (!open) return;
+    const focusables = open.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    const active = document.activeElement;
+    if (e.shiftKey && (active === first || !open.contains(active))) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && (active === last || !open.contains(active))) {
+      e.preventDefault();
+      first.focus();
+    }
+  });
+
   // "Copy Again" inside the preview modal
   const manualCopyBtn = document.getElementById('manual-copy-btn') as HTMLButtonElement;
   const display = document.getElementById('script-link-display') as HTMLPreElement;

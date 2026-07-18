@@ -277,6 +277,15 @@ export function setupSearch(): void {
     searchBar.focus();
   });
 
+  // Escape in the search bar clears the filter (type="search" only clears the text).
+  searchBar.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !searchBar.value) return;
+    e.stopPropagation(); // don't also close a modal
+    searchBar.value = '';
+    applyFilter('');
+    syncQueryParam('');
+  });
+
   // Honour ?q= so the JSON-LD SearchAction (and shared search links) work.
   const initialQuery = new URLSearchParams(window.location.search).get('q');
   if (initialQuery) {
