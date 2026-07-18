@@ -410,6 +410,10 @@ main {
   position: relative;
   overflow: hidden;
   cursor: pointer;
+  /* Skip layout/paint for offscreen cards (big win on mobile scroll);
+     intrinsic size reserves space so the scrollbar doesn't jump. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
   opacity: 0;
   animation: card-entry 0.7s var(--ease-snap) forwards;
   animation-delay: calc(0.55s + var(--card-i, 0) * 0.12s);
