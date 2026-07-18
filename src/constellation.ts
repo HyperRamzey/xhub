@@ -47,8 +47,10 @@ const COLORS: [number, number, number][] = [
 export function startConstellation(canvas: HTMLCanvasElement): () => void {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const coarse = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const count = coarse ? 55 : 110;
+  // dpr 1 on mobile: a dpr-2 canvas on a 1080×2400 phone is a ~40 MB
+  // framebuffer; at dpr 1 the stars/lines still look fine over a dark bg.
+  const dpr = coarse ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+  const count = coarse ? 40 : 110;
   const frameBudget = coarse ? 33 : 16; // 30fps mobile, 60fps desktop
   const linkR = LINK_RADIUS * dpr;
   const linkR2 = linkR * linkR;
@@ -154,13 +156,27 @@ export function startConstellation(canvas: HTMLCanvasElement): () => void {
       return false;
     }
     log('Constellation', 'Canvas2D path active');
+    // Pre-bucketed link styles: one stroke() per alpha bucket per frame
+    // instead of one beginPath/stroke + rgba-string allocation per link.
+    // Segment coords are binned into reusable arrays in a single O(n²) pass.
+    const LINK_BUCKETS = 8;
+    const linkStyles = Array.from({ length: LINK_BUCKETS }, (_, i) =>
+      `rgba(45, 226, 230, ${(((i + 0.5) / LINK_BUCKETS) * 0.32).toFixed(3)})`);
+    const maxPairs = (count * (count - 1)) / 2;
+    const bucketSegs = Array.from({ length: LINK_BUCKETS }, () => new Float32Array(maxPairs * 4));
+    const bucketLen = new Int32Array(LINK_BUCKETS);
+    // Twinkle alpha buckets per hue for star fills (hue-major index).
+    const TW_BUCKETS = 10;
+    const starStyles = COLORS.map(([r, g, b]) =>
+      Array.from({ length: TW_BUCKETS }, (_, i) =>
+        `rgba(${r}, ${g}, ${b}, ${((i + 0.5) / TW_BUCKETS).toFixed(3)})`));
     render = (t) => {
       const time = t / 1000;
       const flash = Math.max(0, 1 - (t - blastAt) / BREAK_FLASH_MS);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // links
-      ctx.lineWidth = 1 * dpr;
+      // links — single pair pass bins segments, then one stroke per bucket
+      bucketLen.fill(0);
       for (let i = 0; i < stars.length; i++) {
         const a = stars[i];
         for (let j = i + 1; j < stars.length; j++) {
@@ -169,13 +185,26 @@ export function startConstellation(canvas: HTMLCanvasElement): () => void {
           const dy = a.y - b.y;
           const d2 = dx * dx + dy * dy;
           if (d2 > linkR2) continue;
-          const alpha = (1 - d2 / linkR2) * 0.32;
-          ctx.strokeStyle = `rgba(45, 226, 230, ${alpha.toFixed(3)})`;
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
+          const k = Math.min(LINK_BUCKETS - 1, Math.floor((1 - d2 / linkR2) * LINK_BUCKETS));
+          const seg = bucketSegs[k];
+          const o = bucketLen[k] * 4;
+          seg[o] = a.x; seg[o + 1] = a.y; seg[o + 2] = b.x; seg[o + 3] = b.y;
+          bucketLen[k]++;
         }
+      }
+      ctx.lineWidth = 1 * dpr;
+      for (let k = 0; k < LINK_BUCKETS; k++) {
+        const m = bucketLen[k];
+        if (!m) continue;
+        const seg = bucketSegs[k];
+        ctx.strokeStyle = linkStyles[k];
+        ctx.beginPath();
+        for (let i = 0; i < m; i++) {
+          const o = i * 4;
+          ctx.moveTo(seg[o], seg[o + 1]);
+          ctx.lineTo(seg[o + 2], seg[o + 3]);
+        }
+        ctx.stroke();
       }
 
       // blast flash ring
@@ -189,13 +218,13 @@ export function startConstellation(canvas: HTMLCanvasElement): () => void {
         ctx.lineWidth = 1 * dpr;
       }
 
-      // stars
+      // stars — bucketed fillStyle, no per-star string allocation
       for (const s of stars) {
         const tw = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(s.phase + time * s.speed));
-        const [r, g, b] = COLORS[s.hue];
+        const bucket = Math.min(TW_BUCKETS - 1, Math.floor(tw * TW_BUCKETS));
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.size * (0.8 + tw * 0.4), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${tw.toFixed(3)})`;
+        ctx.fillStyle = starStyles[s.hue][bucket];
         ctx.fill();
       }
 
@@ -313,6 +342,7 @@ fn fs_main(in: VOut) -> @location(0) vec4f {
     });
 
     const verts = new Float32Array(maxVerts * FLOATS);
+    const uniformArr = new Float32Array(4); // reused every frame
     let n = 0;
     const push = (
       x: number, y: number, r: number, g: number, b: number, a: number,
@@ -382,7 +412,9 @@ fn fs_main(in: VOut) -> @location(0) vec4f {
       const triVerts = n - lineVerts;
 
       device.queue.writeBuffer(vbo, 0, verts, 0, n * FLOATS);
-      device.queue.writeBuffer(ubo, 0, new Float32Array([canvas.width, canvas.height, 0, 0]));
+      uniformArr[0] = canvas.width;
+      uniformArr[1] = canvas.height;
+      device.queue.writeBuffer(ubo, 0, uniformArr);
 
       const enc = device.createCommandEncoder();
       const pass = enc.beginRenderPass({
@@ -447,13 +479,17 @@ fn fs_main(in: VOut) -> @location(0) vec4f {
   window.addEventListener('resize', resize);
 
   void (async () => {
-    const ok = await initWebGPU();
+    // Mobile: never touch WebGPU — adapter/device init allocates GPU memory
+    // and often fails into the fallback anyway. Canvas2D directly.
+    const ok = coarse ? false : await initWebGPU();
     if (disposed) return;
     if (!ok) {
-      // A failed WebGPU attempt may have claimed the canvas context; swap in
-      // a fresh element so getContext('2d') is allowed again.
-      canvas = recreateCanvas(canvas);
-      resize();
+      if (!coarse) {
+        // A failed WebGPU attempt may have claimed the canvas context; swap in
+        // a fresh element so getContext('2d') is allowed again.
+        canvas = recreateCanvas(canvas);
+        resize();
+      }
       if (!initCanvas2D()) return;
     }
     if (reduced) {

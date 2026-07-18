@@ -49,19 +49,10 @@ function setupSwipes(flyout: HTMLElement, setMenu: (open: boolean) => void): voi
   let startY: number | null = null;
   let swipeTarget: HTMLElement | 'menu' | null = null;
 
-  document.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    const prompt = (e.target as HTMLElement).closest<HTMLElement>('.auto-prompt');
-    if (prompt) {
-      swipeTarget = prompt;
-      prompt.classList.add('swiping');
-    } else if (startX < 50) {
-      swipeTarget = 'menu';
-    }
-  }, { passive: true });
-
-  document.addEventListener('touchmove', (e) => {
+  // The non-passive (scroll-blocking) touchmove listener is attached only
+  // while a swipe gesture is actually in progress; normal page scrolling
+  // never waits on JS.
+  function onTouchMove(e: TouchEvent): void {
     if (startX === null || startY === null || !swipeTarget) return;
     const diffX = e.touches[0].clientX - startX;
     const diffY = e.touches[0].clientY - startY;
@@ -75,9 +66,35 @@ function setupSwipes(flyout: HTMLElement, setMenu: (open: boolean) => void): voi
       const progress = Math.min(diffX / 300, 1);
       flyout.style.transform = `translateX(${-105 + 105 * progress}%) translateZ(0)`;
     }
-  }, { passive: false });
+  }
+
+  document.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    const prompt = (e.target as HTMLElement).closest<HTMLElement>('.auto-prompt');
+    if (prompt) {
+      swipeTarget = prompt;
+      prompt.classList.add('swiping');
+    } else if (startX < 50) {
+      swipeTarget = 'menu';
+    }
+    if (swipeTarget) document.addEventListener('touchmove', onTouchMove, { passive: false });
+  }, { passive: true });
+
+  document.addEventListener('touchcancel', () => {
+    document.removeEventListener('touchmove', onTouchMove);
+    if (swipeTarget && swipeTarget !== 'menu') {
+      swipeTarget.classList.remove('swiping');
+      swipeTarget.style.transform = '';
+    } else if (swipeTarget === 'menu') {
+      flyout.style.transform = '';
+    }
+    startX = startY = null;
+    swipeTarget = null;
+  }, { passive: true });
 
   document.addEventListener('touchend', (e) => {
+    document.removeEventListener('touchmove', onTouchMove);
     if (startX === null) return;
     const diffX = e.changedTouches[0].clientX - startX;
     if (swipeTarget && swipeTarget !== 'menu') {
