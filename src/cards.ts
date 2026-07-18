@@ -20,10 +20,14 @@ export function hideModal(modal: HTMLElement): void {
   }, 300);
 }
 
-function openPreviewModal(scriptText: string): void {
+function openPreviewModal(scriptText: string, copied: boolean): void {
   const modal = document.getElementById('script-preview-modal') as HTMLElement;
   const display = document.getElementById('script-link-display') as HTMLPreElement;
+  const msg = document.getElementById('script-preview-msg') as HTMLElement;
   display.textContent = scriptText;
+  msg.textContent = copied
+    ? 'Your script is ready! It has been automatically copied to your clipboard.'
+    : 'Your script is ready! Clipboard access was blocked — tap the code below to select it, then copy it manually.';
   showModal(modal);
 }
 
@@ -62,7 +66,7 @@ async function runCopyFlow(btn: HTMLButtonElement, pre: HTMLPreElement): Promise
   pre.textContent = originalText;
 
   const ok = await copyToClipboard(scriptText);
-  openPreviewModal(scriptText);
+  openPreviewModal(scriptText, ok);
   if (ok) {
     btn.innerHTML = '✓ Copied!';
     btn.classList.add('copied');
@@ -106,8 +110,14 @@ function openDetailModal(script: ScriptDef): void {
   description.textContent = script.description;
   copyBtn.innerHTML = '💪 Copy Script';
   copyBtn.onclick = async () => {
-    const ok = await copyToClipboard(generateRandomLoadstring());
-    if (ok) copyBtn.innerHTML = '✅ Copied!';
+    const text = generateRandomLoadstring();
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      copyBtn.innerHTML = '✅ Copied!';
+    } else {
+      // Clipboard blocked — still surface the script link so the user can copy manually.
+      openPreviewModal(text, false);
+    }
   };
   // Populate gallery dynamically
   gallery.innerHTML = '';

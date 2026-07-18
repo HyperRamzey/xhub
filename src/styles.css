@@ -819,6 +819,8 @@ main {
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #b9c6dd;
+  user-select: all;
+  -webkit-user-select: all;
 }
 .modal-actions { text-align: center; margin-top: 20px; }
 .modal-actions .btn { max-width: 220px; flex-grow: 0; }
@@ -922,16 +924,25 @@ main {
 /* ============================================================
    Auto-prompts
    ============================================================ */
-.auto-prompt {
+#prompt-stack {
   position: fixed;
   bottom: 20px; right: 20px;
+  z-index: 1003;
+  display: flex;
+  flex-direction: column-reverse; /* newest prompt appears above older ones */
+  gap: 12px;
+  align-items: flex-end;
+  pointer-events: none; /* let clicks pass through the empty stack area */
+}
+.auto-prompt {
+  position: relative;
+  pointer-events: auto;
   background: linear-gradient(135deg, rgba(45, 226, 230, 0.92), rgba(121, 30, 148, 0.92));
   color: white;
   padding: 15px 20px;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   transform: translateX(120%) translateZ(0);
-  z-index: 1003;
   max-width: 290px;
   transition: transform 0.35s var(--ease-snap), opacity 0.3s ease;
   touch-action: pan-y;
@@ -1109,7 +1120,8 @@ html { scrollbar-width: thin; scrollbar-color: var(--teal) #0c0d1b; }
 @media (max-width: 480px) {
   .title-container { flex-direction: column; gap: 10px; padding-top: 72px; }
   .subtitle { font-size: 1.05rem; }
-  .auto-prompt { left: 10px; right: 10px; bottom: 10px; max-width: none; }
+  #prompt-stack { left: 10px; right: 10px; bottom: 10px; align-items: stretch; }
+  .auto-prompt { max-width: none; }
   #menu-btn { width: 54px; height: 54px; top: 16px; left: 16px; }
 }
 

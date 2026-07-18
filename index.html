@@ -280,7 +280,7 @@
     <div class="modal-content">
       <button class="close-modal" type="button" aria-label="Close">&times;</button>
       <h2>Script Link</h2>
-      <p>Your script is ready! It has been automatically copied to your clipboard.</p>
+      <p id="script-preview-msg">Your script is ready! It has been automatically copied to your clipboard.</p>
       <pre id="script-link-display"></pre>
       <div class="modal-actions">
         <button id="manual-copy-btn" class="btn copy-btn" type="button">📋 Copy Again</button>
@@ -331,15 +331,17 @@
   </div>
 
   <!-- ============ AUTO PROMPTS ============ -->
-  <div id="notification-prompt" class="auto-prompt" role="alert" hidden>
-    <p><strong>📬 Stay Updated!</strong><br>Get notified about new scripts and updates every hour?</p>
-    <button class="accept-btn" type="button" data-action="enable-notifications">Enable</button>
-    <button class="dismiss-btn" type="button" data-action="dismiss">Maybe Later</button>
-  </div>
-  <div id="install-prompt" class="auto-prompt" role="alert" hidden>
-    <p><strong>📱 Install xlam HUB!</strong><br>Add to your home screen for quick access?</p>
-    <button class="accept-btn" type="button" data-action="install-pwa">Install</button>
-    <button class="dismiss-btn" type="button" data-action="dismiss">Not Now</button>
+  <div id="prompt-stack">
+    <div id="notification-prompt" class="auto-prompt" role="alert" hidden>
+      <p><strong>📬 Stay Updated!</strong><br>Get notified about new scripts and updates every hour?</p>
+      <button class="accept-btn" type="button" data-action="enable-notifications">Enable</button>
+      <button class="dismiss-btn" type="button" data-action="dismiss">Maybe Later</button>
+    </div>
+    <div id="install-prompt" class="auto-prompt" role="alert" hidden>
+      <p><strong>📱 Install xlam HUB!</strong><br>Add to your home screen for quick access?</p>
+      <button class="accept-btn" type="button" data-action="install-pwa">Install</button>
+      <button class="dismiss-btn" type="button" data-action="dismiss">Not Now</button>
+    </div>
   </div>
 
 </body>
