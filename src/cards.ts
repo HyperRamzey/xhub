@@ -10,7 +10,7 @@ const EMOJIS = ['❤️', '💖', '💗', '💓', '💕', '💞'];
 
 let lastFocused: HTMLElement | null = null;
 
-function showModal(modal: HTMLElement): void {
+export function showModal(modal: HTMLElement): void {
   lastFocused = document.activeElement as HTMLElement | null;
   modal.hidden = false;
   requestAnimationFrame(() => {
@@ -180,6 +180,7 @@ export function renderCards(): void {
         thumb.className = 'card-img-thumb';
         thumb.loading = 'lazy';
         thumb.decoding = 'async';
+        thumb.fetchPriority = 'low'; // decorative thumbs never compete with content
         thumb.width = 160;
         thumb.height = 90;
         imgStrip.appendChild(thumb);

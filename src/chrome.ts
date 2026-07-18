@@ -1,4 +1,6 @@
 /** Flyout menu, back-to-top, edge-swipe to open menu, swipe-to-dismiss prompts. */
+import { showModal } from './cards';
+
 export function setupChrome(): void {
   const menuBtn = document.getElementById('menu-btn') as HTMLButtonElement;
   const flyout = document.getElementById('flyout-menu') as HTMLElement;
@@ -21,11 +23,15 @@ export function setupChrome(): void {
   document.addEventListener('touchstart', (e) => {
     if (!flyout.contains(e.target as Node) && !menuBtn.contains(e.target as Node)) setMenu(false);
   }, { passive: true });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !flyout.classList.contains('open')) return;
+    setMenu(false);
+    menuBtn.focus(); // return focus to the toggle for keyboard users
+  });
 
   faqLink.addEventListener('click', (e) => {
     e.preventDefault();
-    executorModal.hidden = false;
-    requestAnimationFrame(() => executorModal.classList.add('visible'));
+    showModal(executorModal);
     setMenu(false);
   });
 

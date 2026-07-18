@@ -1,4 +1,4 @@
-import { hideModal } from './cards';
+import { hideModal, showModal } from './cards';
 import { copyToClipboard } from './clipboard';
 
 /** Wires up every modal overlay, the image lightbox, and shared close behaviour. */
@@ -32,10 +32,7 @@ export function setupModals(): void {
   // Free pet placard
   const placard = document.getElementById('free-pet-placard') as HTMLButtonElement;
   const petModal = document.getElementById('pet-modal') as HTMLElement;
-  placard.addEventListener('click', () => {
-    petModal.hidden = false;
-    requestAnimationFrame(() => petModal.classList.add('visible'));
-  });
+  placard.addEventListener('click', () => showModal(petModal));
 
   setupImageOverlay();
 }
