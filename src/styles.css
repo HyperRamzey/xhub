@@ -854,10 +854,13 @@ main {
 .version-changes { margin-top: 4px; font-size: 0.9rem; color: #dbe4f5; }
 
 /* ---------- image gallery ---------- */
-.image-gallery { display: flex; gap: 15px; margin-bottom: 20px; }
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
 .gallery-img-container {
-  flex: 1;
-  max-width: calc(50% - 8px);
   border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
@@ -871,7 +874,8 @@ main {
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
 }
 .gallery-img-container img {
-  width: 100%; height: 180px;
+  width: 100%;
+  aspect-ratio: 16 / 10;
   object-fit: cover;
   border-radius: 12px;
   display: block;
