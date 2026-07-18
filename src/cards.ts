@@ -24,6 +24,9 @@ export function showModal(modal: HTMLElement): void {
   });
 }
 
+// Page title as shipped in index.html — restored when the detail modal closes.
+const BASE_TITLE = document.title;
+
 export function hideModal(modal: HTMLElement): void {
   modal.classList.remove('visible');
   hideTimers.set(modal, window.setTimeout(() => {
@@ -33,6 +36,7 @@ export function hideModal(modal: HTMLElement): void {
   if (lastFocused?.isConnected) lastFocused.focus();
   lastFocused = null;
   if (modal.id === 'script-detail-modal') {
+    document.title = BASE_TITLE;
     // UI close of a pushed entry: rewind history (popstate no-ops because the
     // modal is already hidden). Deep-link landings have no pushed state — just
     // clean the URL in place.
@@ -137,6 +141,8 @@ function openDetailModal(script: ScriptDef): void {
   const gallery = document.getElementById('modal-image-gallery') as HTMLElement;
   title.textContent = script.title;
   description.textContent = script.description;
+  // Tab title mirrors the open script — deep-linked/shared tabs are identifiable.
+  document.title = `${script.title} — xlam HUB`;
   // Mirror the open script into ?s= so the view is shareable, and push a
   // history entry so the (mobile) Back button closes the modal instead of
   // leaving the site. Deep-link landings already have ?s= in the URL — no
