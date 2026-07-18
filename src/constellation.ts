@@ -121,7 +121,7 @@ export function startConstellation(canvas: HTMLCanvasElement): () => void {
       s.y += s.vy + wy;
     }
     // occasional shooting star
-    if (!shooting && t > nextShootAt && !coarse) {
+    if (!shooting && t > nextShootAt) {
       const fromLeft = Math.random() > 0.5;
       shooting = {
         x: fromLeft ? -20 : canvas.width + 20,
@@ -130,7 +130,7 @@ export function startConstellation(canvas: HTMLCanvasElement): () => void {
         vy: (2.5 + Math.random() * 2) * dpr,
         life: 1,
       };
-      nextShootAt = t + 9000 + Math.random() * 14000;
+      nextShootAt = t + 4500 + Math.random() * 7000;
     }
     if (shooting) {
       shooting.x += shooting.vx;

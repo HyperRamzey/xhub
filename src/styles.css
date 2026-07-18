@@ -1068,7 +1068,10 @@ html { scrollbar-width: thin; scrollbar-color: var(--teal) #0c0d1b; }
     from { opacity: 0; transform: translateZ(0) translateY(20px); }
     to   { opacity: 1; transform: translateZ(0) translateY(0); }
   }
-  .script-card:hover { transform: translateZ(0) translateY(-2px); }
+  .script-card:hover {
+    transform: translateZ(0) perspective(1000px) translateY(-6px) rotateX(3deg);
+    box-shadow: 0 22px 44px rgba(0, 0, 0, 0.4), 0 0 40px rgba(45, 226, 230, 0.1);
+  }
   .buttons { flex-direction: column; gap: 8px; }
   .btn { width: 100%; min-height: 44px; }
   .btn:hover { transform: translateZ(0) translateY(-2px); }
