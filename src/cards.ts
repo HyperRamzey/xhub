@@ -142,6 +142,8 @@ function openDetailModal(script: ScriptDef): void {
       img.className = 'gallery-img';
       img.loading = 'lazy';
       img.decoding = 'async';
+      // Remove the whole tile if the image is missing
+      img.onerror = () => btn.remove();
       btn.appendChild(img);
       gallery.appendChild(btn);
     }
@@ -183,6 +185,8 @@ export function renderCards(): void {
         thumb.fetchPriority = 'low'; // decorative thumbs never compete with content
         thumb.width = 160;
         thumb.height = 90;
+        // A missing file should collapse silently, not show a broken-image icon
+        thumb.onerror = () => thumb.remove();
         imgStrip.appendChild(thumb);
       }
       card.insertBefore(imgStrip, h2.nextSibling);
