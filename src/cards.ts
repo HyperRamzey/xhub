@@ -210,15 +210,25 @@ export function renderCards(): void {
 export function setupSearch(): void {
   const searchBar = document.getElementById('search-bar') as HTMLInputElement;
   const noResults = document.getElementById('no-results') as HTMLElement;
-  searchBar.addEventListener('input', () => {
-    const term = searchBar.value.toLowerCase();
+
+  const applyFilter = (term: string): void => {
+    const q = term.toLowerCase();
     let visible = 0;
     document.querySelectorAll<HTMLElement>('.script-card').forEach((card) => {
       const title = card.querySelector('h2')?.textContent?.toLowerCase() ?? '';
-      const match = title.includes(term);
+      const match = title.includes(q);
       card.style.display = match ? 'flex' : 'none';
       if (match) visible++;
     });
     noResults.hidden = visible > 0;
-  });
+  };
+
+  searchBar.addEventListener('input', () => applyFilter(searchBar.value));
+
+  // Honour ?q= so the JSON-LD SearchAction (and shared search links) work.
+  const initialQuery = new URLSearchParams(window.location.search).get('q');
+  if (initialQuery) {
+    searchBar.value = initialQuery;
+    applyFilter(initialQuery);
+  }
 }
