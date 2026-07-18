@@ -16,14 +16,21 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    Promise.all([
+      caches.keys().then((keys) =>
+        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      ),
+      // Let the browser start navigation requests in parallel with SW boot
+      self.registration.navigationPreload?.enable(),
+    ]).then(() => self.clients.claim())
   );
 });
 
-function fetchAndCache(request) {
-  return fetch(request).then((response) => {
+function fetchAndCache(request, preload) {
+  const network = preload
+    ? preload.then((hit) => hit || fetch(request))
+    : fetch(request);
+  return network.then((response) => {
     if (response.ok && new URL(request.url).origin === self.location.origin) {
       const clone = response.clone();
       caches.open(CACHE).then((cache) => cache.put(request, clone));
@@ -42,7 +49,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     immutable
       ? caches.match(request).then((hit) => hit || fetchAndCache(request))
-      : fetchAndCache(request).catch(() =>
+      : fetchAndCache(request, event.preloadResponse).catch(() =>
           caches.match(request).then((hit) => hit || Response.error())
         )
   );
