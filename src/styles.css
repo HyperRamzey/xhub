@@ -427,6 +427,30 @@ main {
   color: var(--ink);
   text-shadow: 0 0 22px rgba(45, 226, 230, 0.35);
 }
+
+/* Card image strip */
+.card-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+.card-img-thumb {
+  height: 72px;
+  width: auto;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(45, 226, 230, 0.2);
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.card-img-thumb:hover {
+  border-color: rgba(45, 226, 230, 0.6);
+  transform: scale(1.04);
+}
+
 .script-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 18px; }
 .status-tags { display: flex; flex-wrap: wrap; gap: 8px; }
 .tag {
@@ -1030,7 +1054,9 @@ html { scrollbar-width: thin; scrollbar-color: var(--teal) #0c0d1b; }
   main { padding: 24px 12px 48px; }
   .script-card {
     padding: 20px;
+    /* blur during scroll is the #1 mobile jank source — solid panel instead */
     backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     background: rgba(24, 28, 58, 0.92);
     animation-name: card-entry-mobile;
   }
@@ -1042,26 +1068,37 @@ html { scrollbar-width: thin; scrollbar-color: var(--teal) #0c0d1b; }
   .buttons { flex-direction: column; gap: 8px; }
   .btn { width: 100%; min-height: 44px; }
   .btn:hover { transform: translateZ(0) translateY(-2px); }
-  #search-bar { backdrop-filter: none; }
-  #crt-overlay { opacity: 0.35; }
+  #search-bar {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(24, 28, 58, 0.92);
+  }
+  /* full-screen multiply blending repaints every frame anything moves */
+  #crt-overlay { opacity: 0.25; mix-blend-mode: normal; }
   #star-constellation { opacity: 0.4; }
 }
-/* ============================================================
-   Coarse-pointer (touch) — park infinite animations, drop blend-mode
-   ============================================================ */
+
+/* Coarse-pointer battery/RAM tuning: park the always-running decorative
+   animations (their styled end state remains) and demote layers that no
+   longer animate. The logo glitch and constellation stay alive. */
 @media (hover: none), (pointer: coarse) {
-  .lamhub-text, .x-logo-svg, .x-path, #logo-bottle, .bottle::before, .tag.premium, .placard { animation: none; }
-  .stage-layer, #star-constellation, #crt-overlay, #custom-cursor,
-  .script-card, .btn, .placard, #back-to-top, .modal-content,
-  .auto-prompt, #flyout-menu, .bottle,
-  .x-logo-svg, .lamhub-text, .dancing-text span, .loader-bar {
+  .lamhub-text,
+  .x-logo-svg,
+  .x-path,
+  #logo-bottle,
+  .bottle::before,
+  .tag.premium,
+  .placard {
+    animation: none;
+  }
+  .lamhub-text { background-position: 50% 50%; will-change: auto; }
+  .x-logo-svg, #logo-bottle { will-change: auto; }
+  .x-path { stroke: var(--teal); }
+  .script-card, .btn, .placard, .bottle {
     transform: none;
     will-change: auto;
   }
-  .x-path { stroke: var(--teal); }
-  #crt-overlay { mix-blend-mode: normal; }
 }
-
 @media (max-width: 480px) {
   .title-container { flex-direction: column; gap: 10px; padding-top: 72px; }
   .subtitle { font-size: 1.05rem; }

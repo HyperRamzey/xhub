@@ -101,6 +101,7 @@ function openDetailModal(script: ScriptDef): void {
   const title = document.getElementById('modal-title') as HTMLElement;
   const description = document.getElementById('modal-description') as HTMLElement;
   const copyBtn = document.getElementById('modal-copy-btn') as HTMLButtonElement;
+  const gallery = document.getElementById('modal-image-gallery') as HTMLElement;
   title.textContent = script.title;
   description.textContent = script.description;
   copyBtn.innerHTML = '💪 Copy Script';
@@ -108,6 +109,22 @@ function openDetailModal(script: ScriptDef): void {
     const ok = await copyToClipboard(generateRandomLoadstring());
     if (ok) copyBtn.innerHTML = '✅ Copied!';
   };
+  // Populate gallery dynamically
+  gallery.innerHTML = '';
+  if (script.images?.length) {
+    for (const src of script.images) {
+      const btn = document.createElement('button');
+      btn.className = 'gallery-img-container';
+      btn.type = 'button';
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = `${script.title} preview`;
+      img.className = 'gallery-img';
+      img.loading = 'lazy';
+      btn.appendChild(img);
+      gallery.appendChild(btn);
+    }
+  }
   showModal(modal);
 }
 
@@ -127,6 +144,22 @@ export function renderCards(): void {
 
     const h2 = document.createElement('h2');
     h2.textContent = script.heading;
+
+    // Image strip on card (max 3 thumbnails)
+    if (script.images?.length) {
+      const imgStrip = document.createElement('div');
+      imgStrip.className = 'card-images';
+      const maxThumbs = Math.min(script.images.length, 3);
+      for (let i = 0; i < maxThumbs; i++) {
+        const thumb = document.createElement('img');
+        thumb.src = script.images[i];
+        thumb.alt = `${script.title} preview ${i + 1}`;
+        thumb.className = 'card-img-thumb';
+        thumb.loading = 'lazy';
+        imgStrip.appendChild(thumb);
+      }
+      card.insertBefore(imgStrip, h2.nextSibling);
+    }
 
     const meta = document.createElement('div');
     meta.className = 'script-meta';

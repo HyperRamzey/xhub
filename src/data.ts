@@ -5,6 +5,7 @@ export interface ScriptDef {
   description: string;
   tags: { label: string; cls: string }[];
   changelogKey?: string;
+  images?: string[];
 }
 
 export const SCRIPT_URL =
@@ -27,6 +28,11 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '👑 VERIFIED', cls: 'verified' },
     ],
     changelogKey: 'autofarm',
+    images: [
+      'scripts/eclipse-autofarm-1.jpg',
+      'scripts/eclipse-autofarm-2.jpg',
+      'scripts/yt-eclipse-hub-video.jpg',
+    ],
   },
   {
     id: 'pet-spawner-visual',
@@ -39,6 +45,11 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '👑 VERIFIED', cls: 'verified' },
     ],
     changelogKey: 'pet-spawner',
+    images: [
+      'scripts/yt-pet-spawner-halloween.jpg',
+      'scripts/yt-pet-spawner-july.jpg',
+      'scripts/pet-spawner-1.jpg',
+    ],
   },
   {
     id: 'trade-checker',
@@ -49,6 +60,11 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '✅ UPDATED', cls: 'updated' },
       { label: '⚡ WORKING', cls: 'working' },
       { label: '👑 VERIFIED', cls: 'verified' },
+    ],
+    images: [
+      'scripts/yt-trade-scam.jpg',
+      'scripts/yt-trade-scam-new.jpg',
+      'scripts/trade-checker-1.jpg',
     ],
   },
   {
@@ -61,6 +77,10 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '⚡ WORKING', cls: 'working' },
       { label: '👑 VERIFIED', cls: 'verified' },
     ],
+    images: [
+      'scripts/yt-trade-scam.jpg',
+      'scripts/trade-bypass-1.jpg',
+    ],
   },
   {
     id: 'food-money',
@@ -71,6 +91,10 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '✅ UPDATED', cls: 'updated' },
       { label: '⚡ WORKING', cls: 'working' },
       { label: '👑 VERIFIED', cls: 'verified' },
+    ],
+    images: [
+      'scripts/yt-adoptme-event.jpg',
+      'scripts/food-money-1.jpg',
     ],
   },
   {
@@ -84,6 +108,77 @@ export const SCRIPTS: ScriptDef[] = [
       { label: '⚡ WORKING', cls: 'working' },
       { label: '💎 PREMIUM', cls: 'premium' },
       { label: '👑 VERIFIED', cls: 'verified' },
+    ],
+    images: [
+      'scripts/yt-fps-unlock.jpg',
+      'scripts/yt-fps-unlock2.jpg',
+    ],
+  },
+  {
+    id: 'axonic-keyless',
+    title: 'Adopt Me - Axonic Keyless Hub',
+    heading: 'adopt me axonic keyless hub',
+    description:
+      'Axonic Keyless Hub for Adopt Me — auto-farm, keyless pet collection, and smart task automation in one clean interface.',
+    tags: [
+      { label: '✅ UPDATED', cls: 'updated' },
+      { label: '⚡ WORKING', cls: 'working' },
+      { label: '👑 VERIFIED', cls: 'verified' },
+    ],
+    images: [
+      'scripts/yt-atherhub.jpg',
+      'scripts/yt-keyless-script.jpg',
+      'scripts/axonic-1.jpg',
+    ],
+  },
+  {
+    id: 'snowy-hub',
+    title: 'Adopt Me - Snowy Hub Autofarm',
+    heading: 'adopt me snowy hub autofarm',
+    description:
+      'Snowy Hub delivers full auto-farm for Adopt Me — pet collection, cash farming, and daily tasks automated.',
+    tags: [
+      { label: '✅ UPDATED', cls: 'updated' },
+      { label: '⚡ WORKING', cls: 'working' },
+      { label: '👑 VERIFIED', cls: 'verified' },
+    ],
+    images: [
+      'scripts/yt-eclipse-showcase.jpg',
+      'scripts/snowy-1.jpg',
+      'scripts/snowy-2.jpg',
+    ],
+  },
+  {
+    id: 'forge-hub',
+    title: 'Adopt Me - Forge Hub Full Tasks',
+    heading: 'adopt me forge hub full tasks',
+    description:
+      'Forge Hub covers every Adopt Me task — auto-farm, pet collection, obby completion, and more in a single script.',
+    tags: [
+      { label: '✅ UPDATED', cls: 'updated' },
+      { label: '⚡ WORKING', cls: 'working' },
+      { label: '👑 VERIFIED', cls: 'verified' },
+    ],
+    images: [
+      'scripts/yt-adoptme-event.jpg',
+      'scripts/forge-1.jpg',
+      'scripts/forge-2.jpg',
+    ],
+  },
+  {
+    id: 'dp-hub',
+    title: 'Adopt Me - DP Hub House Clone',
+    heading: 'adopt me dp hub house clone',
+    description:
+      'DP Hub clones the Adopt Me house system — auto-feed, auto-farm, and pet management all in one.',
+    tags: [
+      { label: '✅ UPDATED', cls: 'updated' },
+      { label: '⚡ WORKING', cls: 'working' },
+      { label: '👑 VERIFIED', cls: 'verified' },
+    ],
+    images: [
+      'scripts/yt-pet-spawner-halloween.jpg',
+      'scripts/dp-hub-1.jpg',
     ],
   },
 ];
@@ -121,6 +216,39 @@ const CHANGELOGS: Record<string, ChangelogEntry[]> = {
     { date: '2024-10-03', changes: '🏠 House decoration farming added' },
     { date: '2024-11-17', changes: '🎮 Multi-game support expansion' },
     { date: '2024-12-18', changes: '🎉 Year-end performance boost update' },
+  ],
+  'axonic-keyless': [
+    { date: '2025-06-10', changes: '🆕 Axonic Keyless Hub initial release' },
+    { date: '2025-07-22', changes: '💰 Auto-farm and keyless pet collection added' },
+    { date: '2025-09-05', changes: '🏃 Smart task automation for daily routines' },
+    { date: '2025-11-14', changes: '🛡️ Anti-ban protection improvements' },
+    { date: '2026-01-30', changes: '🎯 Enhanced pet collection UI' },
+    { date: '2026-04-18', changes: '⚡ 40% faster farming algorithms' },
+    { date: '2026-06-25', changes: '🔧 Compatibility fixes for latest Roblox update' },
+  ],
+  'snowy-hub': [
+    { date: '2025-05-15', changes: '🆕 Snowy Hub initial release' },
+    { date: '2025-08-20', changes: '💰 Full auto-farm implementation' },
+    { date: '2025-10-30', changes: '🐾 Pet collection and cash farming automation' },
+    { date: '2026-01-12', changes: '🏠 Daily tasks auto-completion' },
+    { date: '2026-03-28', changes: '🛡️ Anti-detection system update' },
+    { date: '2026-06-15', changes: '🎨 Redesigned GUI with better UX' },
+  ],
+  'forge-hub': [
+    { date: '2025-04-01', changes: '🆕 Forge Hub initial release' },
+    { date: '2025-06-18', changes: '💰 Auto-farm and pet collection added' },
+    { date: '2025-09-10', changes: '🏃 Obby completion automation' },
+    { date: '2025-12-05', changes: '🎪 Multi-task support expansion' },
+    { date: '2026-02-20', changes: '🛡️ Improved anti-ban protection' },
+    { date: '2026-05-10', changes: '⚡ Performance boost and bug fixes' },
+  ],
+  'dp-hub': [
+    { date: '2025-07-01', changes: '🆕 DP Hub initial release' },
+    { date: '2025-09-25', changes: '🏠 House clone system added' },
+    { date: '2025-12-15', changes: '💰 Auto-feed and auto-farm integration' },
+    { date: '2026-02-10', changes: '🐾 Pet management tools' },
+    { date: '2026-04-30', changes: '🛡️ Anti-detection update' },
+    { date: '2026-07-01', changes: '🎯 Enhanced automation for all house tasks' },
   ],
 };
 
