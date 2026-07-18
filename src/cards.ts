@@ -286,6 +286,14 @@ export function setupSearch(): void {
     syncQueryParam('');
   });
 
+  // "Clear search" button inside the no-results message
+  document.getElementById('clear-search')?.addEventListener('click', () => {
+    searchBar.value = '';
+    applyFilter('');
+    syncQueryParam('');
+    searchBar.focus();
+  });
+
   // Honour ?q= so the JSON-LD SearchAction (and shared search links) work.
   const initialQuery = new URLSearchParams(window.location.search).get('q');
   if (initialQuery) {
