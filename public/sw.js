@@ -1,7 +1,13 @@
-/* Network-first service worker: page is always fresh when online
-   (matches the old site's "never serve stale HTML" goal without the
-   old cache-busting URL rewrites), and still works offline. */
-const CACHE = 'xlam-hub-v2';
+/* Hybrid caching service worker:
+   - HTML/navigation: network-first — page is always fresh when online
+     (matches the old site's "never serve stale HTML" goal), still works offline.
+   - Hashed Vite bundles (/assets/) and script thumbnails: cache-first —
+     these files are content-addressed or renamed on change, so repeat
+     visitors (especially mobile) stop re-downloading megabytes of images. */
+const CACHE = 'xlam-hub-v3';
+
+// Immutable-by-convention paths: safe to serve from cache forever.
+const CACHE_FIRST = /\/(assets|scripts|icons)\//;
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -16,18 +22,28 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+function fetchAndCache(request) {
+  return fetch(request).then((response) => {
+    if (response.ok && new URL(request.url).origin === self.location.origin) {
+      const clone = response.clone();
+      caches.open(CACHE).then((cache) => cache.put(request, clone));
+    }
+    return response;
+  });
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET' || !request.url.startsWith('http')) return;
+
+  const url = new URL(request.url);
+  const immutable = url.origin === self.location.origin && CACHE_FIRST.test(url.pathname);
+
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response.ok && new URL(request.url).origin === self.location.origin) {
-          const clone = response.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(request).then((hit) => hit || Response.error()))
+    immutable
+      ? caches.match(request).then((hit) => hit || fetchAndCache(request))
+      : fetchAndCache(request).catch(() =>
+          caches.match(request).then((hit) => hit || Response.error())
+        )
   );
 });
