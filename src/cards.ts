@@ -263,7 +263,19 @@ export function setupSearch(): void {
     status.textContent = q ? `${visible} script${visible === 1 ? '' : 's'} found` : '';
   };
 
-  searchBar.addEventListener('input', () => applyFilter(searchBar.value));
+  searchBar.addEventListener('input', () => {
+    applyFilter(searchBar.value);
+    syncQueryParam(searchBar.value);
+  });
+
+  // "/" focuses the search bar (common list-page convention); ignored while typing.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    const el = document.activeElement;
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) return;
+    e.preventDefault();
+    searchBar.focus();
+  });
 
   // Honour ?q= so the JSON-LD SearchAction (and shared search links) work.
   const initialQuery = new URLSearchParams(window.location.search).get('q');
@@ -271,4 +283,17 @@ export function setupSearch(): void {
     searchBar.value = initialQuery;
     applyFilter(initialQuery);
   }
+}
+
+let syncTimer = 0;
+/** Debounced: mirror the search term into ?q= so results are shareable. */
+function syncQueryParam(term: string): void {
+  window.clearTimeout(syncTimer);
+  syncTimer = window.setTimeout(() => {
+    const url = new URL(window.location.href);
+    const q = term.trim();
+    if (q) url.searchParams.set('q', q);
+    else url.searchParams.delete('q');
+    window.history.replaceState(null, '', url);
+  }, 400);
 }
